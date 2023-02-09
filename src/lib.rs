@@ -1,4 +1,3 @@
-use std::fs::File;
 use std::io::{BufWriter, Write};
 
 const PPM_HEADER: &str = "P3\n";
@@ -62,9 +61,16 @@ impl Ppm {
         self.pixels[self.height - 1 - y][x] = pixel;
     }
 
-    pub fn write(&self, path: &str) {
-        let file = File::create(path).expect(&format!("Could not create file {path}"));
-        let mut writer = BufWriter::new(file);
+    pub fn get_height(&self) -> usize {
+        self.height
+    }
+
+    pub fn get_width(&self) -> usize {
+        self.width
+    }
+
+    pub fn write(&self, output: &mut dyn Write) {
+        let mut writer = BufWriter::new(output);
 
         writer
             .write_all(PPM_HEADER.as_bytes())

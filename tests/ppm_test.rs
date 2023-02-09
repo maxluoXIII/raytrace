@@ -1,8 +1,9 @@
-use std::fs::File;
+use std::{fs::File, io::Read};
 
 use raytrace::Ppm;
 
-fn main() {
+#[test]
+fn create_and_write() {
     let width = 200;
     let height = 100;
     let mut ppm = Ppm::from(width, height);
@@ -15,6 +16,12 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/test-expected.ppm").expect("Could not create ppm file");
-    ppm.write(&mut file);
+    let mut output = Vec::new();
+    ppm.write(&mut output);
+
+    let mut expected_file = File::open("output/test-expected.ppm").expect("Could not open expected file");
+    let mut expected_output = Vec::new();
+    expected_file.read_to_end(&mut expected_output).expect("Could not read expected file");
+
+    assert!(output == expected_output);
 }
