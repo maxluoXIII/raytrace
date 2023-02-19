@@ -1,6 +1,7 @@
 use std::fs::File;
+use rand::random;
 
-use raytrace::{Ppm, types::{Vec3, unit_vector, Ray}, hittable::{Sphere, Hittable, HittableList}};
+use raytrace::{Ppm, types::{Vec3, unit_vector, Ray}, hittable::{Sphere, Hittable, HittableList}, Camera};
 
 fn color(ray: Ray, world: &dyn Hittable) -> Vec3 {
     if let Some(hit_rec) = world.hit((0.0, f64::MAX), &ray) {
@@ -16,28 +17,30 @@ fn color(ray: Ray, world: &dyn Hittable) -> Vec3 {
 fn main() {
     let width = 200;
     let height = 100;
+    let num_samples = 100;
     let mut ppm = Ppm::from(width, height);
-
-    let lower_left_corner = Vec3::from(-2.0, -1.0, -1.0);
-    let horizontal = Vec3::from(4.0, 0.0, 0.0);
-    let vertical = Vec3::from(0.0, 2.0, 0.0);
-    let origin = Vec3::from(0.0, 0.0, 0.0);
 
     let mut world = HittableList::new();
     world.add(Box::new(Sphere::from(Vec3::from(0.0, 0.0, -1.0), 0.5)));
     world.add(Box::new(Sphere::from(Vec3::from(0.0, -100.5, -1.0), 100.0)));
+
+    let camera = Camera::new();
     for y in (0..height).rev() {
         for x in 0..width {
-            let u = (x as f64) / (width as f64);
-            let v = (y as f64) / (height as f64);
+            let mut col = Vec3::new();
+            for _ in 0..num_samples {
+                let u = (x as f64 + random::<f64>()) / (width as f64);
+                let v = (y as f64 + random::<f64>()) / (height as f64);
 
-            let r = Ray::from(origin, lower_left_corner + u * horizontal + v * vertical);
-            let col = color(r, &world);
+                let ray = camera.get_ray(u, v);
+                col += color(ray, &world);
+            }
+            col /= num_samples as f64;
 
             ppm.set_pixel(x, y, col * 255.99);
         }
     }
 
-    let mut file = File::create("output/chapter5-2.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter6.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }
