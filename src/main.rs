@@ -1,15 +1,16 @@
 use std::fs::File;
 
-use raytrace::{Ppm, types::{Vec3, unit_vector, Ray}, hittable::{Sphere, Hittable}};
+use raytrace::{Ppm, types::{Vec3, unit_vector, Ray}, hittable::{Sphere, Hittable, HittableList}};
 
-fn color(ray: Ray, sphere: &Sphere) -> Vec3 {
-    if let Some(t) = sphere.hit(&ray) {
-        let N = unit_vector(&(ray.pos(t) - Vec3::from(0.0, 0.0, -1.0)));
-        return 0.5 * Vec3::from(N.x()+1.0, N.y()+1.0, N.z()+1.0);
+fn color(ray: Ray, world: &dyn Hittable) -> Vec3 {
+    if let Some(hit_rec) = world.hit((0.0, f64::MAX), &ray) {
+        let normal = hit_rec.normal;
+        return 0.5 * Vec3::from(normal.x()+1.0, normal.y()+1.0, normal.z()+1.0);
+    } else {
+        let unit_dir = unit_vector(&ray.direction);
+        let t = 0.5 * (unit_dir.y() + 1.0);
+        return (1.0 - t) * Vec3::from(1.0, 1.0, 1.0) + t * Vec3::from(0.5, 0.7, 1.0);
     }
-    let unit_dir = unit_vector(&ray.direction);
-    let t = 0.5 * (unit_dir.y() + 1.0);
-    return (1.0 - t) * Vec3::from(1.0, 1.0, 1.0) + t * Vec3::from(0.5, 0.7, 1.0);
 }
 
 fn main() {
@@ -22,19 +23,21 @@ fn main() {
     let vertical = Vec3::from(0.0, 2.0, 0.0);
     let origin = Vec3::from(0.0, 0.0, 0.0);
 
-    let sphere = Sphere::from(Vec3::from(0.0, 0.0, -1.0), 0.5);
+    let mut world = HittableList::new();
+    world.add(Box::new(Sphere::from(Vec3::from(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::from(Vec3::from(0.0, -100.5, -1.0), 100.0)));
     for y in (0..height).rev() {
         for x in 0..width {
             let u = (x as f64) / (width as f64);
             let v = (y as f64) / (height as f64);
 
             let r = Ray::from(origin, lower_left_corner + u * horizontal + v * vertical);
-            let col = color(r, &sphere);
+            let col = color(r, &world);
 
             ppm.set_pixel(x, y, col * 255.99);
         }
     }
 
-    let mut file = File::create("output/chapter5-1.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter5-2.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }
