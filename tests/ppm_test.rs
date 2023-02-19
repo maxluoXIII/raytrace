@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read};
 
-use raytrace::Ppm;
+use raytrace::{Ppm, types::Vec3};
 
 #[test]
 fn create_and_write() {
@@ -9,10 +9,10 @@ fn create_and_write() {
     let mut ppm = Ppm::from(width, height);
     for y in (0..height).rev() {
         for x in 0..width {
-            let r = ((x as f64) / (width as f64) * 255.99) as u32;
-            let g = ((y as f64) / (height as f64) * 255.99) as u32;
-            let b = (0.2 * 255.99) as u32;
-            ppm.set_pixel(x, y, (r, g, b));
+            let r = (x as f64) / (width as f64) * 255.99;
+            let g = (y as f64) / (height as f64) * 255.99;
+            let b = 0.2 * 255.99;
+            ppm.set_pixel(x, y, Vec3::from(r, g, b));
         }
     }
 
