@@ -3,8 +3,9 @@ use std::fs::File;
 use raytrace::{Ppm, types::{Vec3, unit_vector, Ray}, hittable::{Sphere, Hittable}};
 
 fn color(ray: Ray, sphere: &Sphere) -> Vec3 {
-    if sphere.hit(&ray) {
-        return Vec3::from(1.0, 0.0, 0.0);
+    if let Some(t) = sphere.hit(&ray) {
+        let N = unit_vector(&(ray.pos(t) - Vec3::from(0.0, 0.0, -1.0)));
+        return 0.5 * Vec3::from(N.x()+1.0, N.y()+1.0, N.z()+1.0);
     }
     let unit_dir = unit_vector(&ray.direction);
     let t = 0.5 * (unit_dir.y() + 1.0);
@@ -34,6 +35,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter4.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter5-1.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }

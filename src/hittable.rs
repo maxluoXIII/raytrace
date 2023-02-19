@@ -1,7 +1,7 @@
 use crate::types::{Ray, Vec3};
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray) -> bool;
+    fn hit(&self, ray: &Ray) -> Option<f64>;
 }
 
 pub struct Sphere {
@@ -26,13 +26,18 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray) -> bool {
+    fn hit(&self, ray: &Ray) -> Option<f64> {
         let oc = ray.origin - self.center;
         let a = Vec3::dot(&ray.direction, &ray.direction);
         let b = 2.0 * Vec3::dot(&oc, &ray.direction);
         let c = Vec3::dot(&oc, &oc) - self.radius * self.radius;
         let discriminant = b*b - 4.0 * a*c;
 
-        discriminant >= 0.0
+        if discriminant < 0.0 {
+            None
+        } else {
+            Some((-b - f64::sqrt(discriminant)) / (2.0 * a))
+        }
+
     }
 }
