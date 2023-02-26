@@ -1,17 +1,24 @@
-use std::fs::File;
 use rand::random;
+use std::fs::File;
 
-use raytrace::{Ppm, types::{Vec3, unit_vector, Ray}, hittable::{Sphere, Hittable, HittableList}, Camera};
+use raytrace::{
+    hittable::{Hittable, HittableList, Sphere},
+    types::{unit_vector, Ray, Vec3},
+    Camera, Ppm,
+};
 
-fn color(ray: Ray, world: &dyn Hittable) -> Vec3 {
-    if let Some(hit_rec) = world.hit((0.0, f64::MAX), &ray) {
-        let normal = hit_rec.normal;
-        return 0.5 * Vec3::from(normal.x()+1.0, normal.y()+1.0, normal.z()+1.0);
-    } else {
-        let unit_dir = unit_vector(&ray.direction);
-        let t = 0.5 * (unit_dir.y() + 1.0);
-        return (1.0 - t) * Vec3::from(1.0, 1.0, 1.0) + t * Vec3::from(0.5, 0.7, 1.0);
+const MAX_BOUNCE: usize = 10;
+fn color(ray: Ray, world: &dyn Hittable, bounce: usize) -> Vec3 {
+    if MAX_BOUNCE > bounce {
+        if let Some(hit_rec) = world.hit((0.0, f64::MAX), &ray) {
+            let target = hit_rec.p + hit_rec.normal + Sphere::random_in_unit_sphere();
+            return 0.5 * color(Ray::from(hit_rec.p, target - hit_rec.p), world, bounce + 1);
+        }
     }
+
+    let unit_dir = unit_vector(&ray.direction);
+    let t = 0.5 * (unit_dir.y() + 1.0);
+    return (1.0 - t) * Vec3::from(1.0, 1.0, 1.0) + t * Vec3::from(0.5, 0.7, 1.0);
 }
 
 fn main() {
@@ -33,7 +40,7 @@ fn main() {
                 let v = (y as f64 + random::<f64>()) / (height as f64);
 
                 let ray = camera.get_ray(u, v);
-                col += color(ray, &world);
+                col += color(ray, &world, 0);
             }
             col /= num_samples as f64;
 
@@ -41,6 +48,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter6.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter7-1.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }

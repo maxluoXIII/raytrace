@@ -1,3 +1,5 @@
+use rand::random;
+
 use crate::types::{Ray, Vec3};
 
 pub struct HitRecord {
@@ -25,6 +27,15 @@ impl Sphere {
 
     pub fn from(center: Vec3, radius: f64) -> Sphere {
         Sphere { center, radius }
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        let mut sample = Vec3::from(random::<f64>(), random::<f64>(), random::<f64>());
+        while sample.length() > 1.0 {
+            sample = Vec3::from(random::<f64>(), random::<f64>(), random::<f64>());
+        }
+
+        sample
     }
 }
 
