@@ -43,11 +43,12 @@ fn main() {
                 col += color(ray, &world, 0);
             }
             col /= num_samples as f64;
+            col = Vec3::from(f64::sqrt(col.x()), f64::sqrt(col.y()), f64::sqrt(col.z()));
 
             ppm.set_pixel(x, y, col * 255.99);
         }
     }
 
-    let mut file = File::create("output/chapter7-1.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter7-2.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }
