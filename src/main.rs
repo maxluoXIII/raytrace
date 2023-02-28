@@ -44,12 +44,12 @@ fn main() {
     world.add(Box::new(Sphere::from(
         Vec3::from(1.0, 0.0, -1.0),
         0.5,
-        Rc::new(Metal::from(Vec3::from(0.8, 0.6, 0.2))),
+        Rc::new(Metal::from(Vec3::from(0.8, 0.6, 0.2), 1.0)),
     )));
     world.add(Box::new(Sphere::from(
         Vec3::from(-1.0, 0.0, -1.0),
         0.5,
-        Rc::new(Metal::from(Vec3::from(0.8, 0.8, 0.8))),
+        Rc::new(Metal::from(Vec3::from(0.8, 0.8, 0.8), 0.3)),
     )));
 
     let camera = Camera::new();
@@ -70,6 +70,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter8-1.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter8-2.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }

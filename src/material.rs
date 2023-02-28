@@ -29,11 +29,13 @@ impl Material for Lambertian {
 
 pub struct Metal {
     albedo: Vec3,
+    fuzziness: f64,
 }
 
 impl Metal {
-    pub fn from(albedo: Vec3) -> Metal {
-        Metal { albedo }
+    pub fn from(albedo: Vec3, fuzziness: f64) -> Metal {
+        let fuzziness = f64::min(fuzziness, 1.0);
+        Metal { albedo, fuzziness }
     }
 }
 
@@ -43,7 +45,8 @@ fn reflect(vec: &Vec3, normal: &Vec3) -> Vec3 {
 
 impl Material for Metal {
     fn scatter(&self, r_in: &Ray, hit_rec: &HitRecord) -> Option<(Ray, Vec3)> {
-        let reflected = reflect(&r_in.direction, &hit_rec.normal);
+        let reflected = reflect(&r_in.direction, &hit_rec.normal)
+            + self.fuzziness * Sphere::random_in_unit_sphere();
         if Vec3::dot(&reflected, &hit_rec.normal) > 0.0 {
             Some((Ray::from(hit_rec.p, reflected), self.albedo))
         } else {
