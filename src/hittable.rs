@@ -1,11 +1,15 @@
+use std::rc::Rc;
+
 use rand::random;
 
+use crate::material::{Material, Lambertian};
 use crate::types::{Ray, Vec3};
 
 pub struct HitRecord {
     pub t: f64,
     pub p: Vec3, // hit point
     pub normal: Vec3,
+    pub mat: Rc<dyn Material>,
 }
 
 pub trait Hittable {
@@ -15,6 +19,7 @@ pub trait Hittable {
 pub struct Sphere {
     center: Vec3,
     radius: f64,
+    material: Rc<dyn Material>,
 }
 
 impl Sphere {
@@ -22,11 +27,16 @@ impl Sphere {
         Sphere {
             center: Vec3::new(),
             radius: 1.0,
+            material: Rc::new(Lambertian::from(Vec3::from(0.5, 0.5, 0.5))),
         }
     }
 
-    pub fn from(center: Vec3, radius: f64) -> Sphere {
-        Sphere { center, radius }
+    pub fn from(center: Vec3, radius: f64, material: Rc<dyn Material>) -> Sphere {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 
     pub fn random_in_unit_sphere() -> Vec3 {
@@ -55,6 +65,7 @@ impl Hittable for Sphere {
                     t: temp,
                     p: ray.pos(temp),
                     normal: (ray.pos(temp) - self.center) / self.radius,
+                    mat: self.material.clone(),
                 });
             }
 
@@ -64,6 +75,7 @@ impl Hittable for Sphere {
                     t: temp,
                     p: ray.pos(temp),
                     normal: ((ray.pos(temp) - self.center) / self.radius),
+                    mat: self.material.clone(),
                 });
             }
         }
@@ -78,9 +90,7 @@ pub struct HittableList {
 
 impl HittableList {
     pub fn new() -> HittableList {
-        HittableList {
-            list: Vec::new(),
-        }
+        HittableList { list: Vec::new() }
     }
 
     pub fn add(&mut self, obj: Box<dyn Hittable>) {

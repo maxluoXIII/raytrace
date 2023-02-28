@@ -1,16 +1,22 @@
 use rand::random;
-use std::fs::File;
+use std::{fs::File, rc::Rc};
 
 use raytrace::{
     hittable::{Hittable, HittableList, Sphere},
+    material::{Lambertian, Metal},
     types::{unit_vector, Ray, Vec3},
     Camera, Ppm,
 };
 
-fn color(ray: Ray, world: &dyn Hittable) -> Vec3 {
+fn color(ray: Ray, world: &dyn Hittable, depth: usize) -> Vec3 {
     if let Some(hit_rec) = world.hit((0.001, f64::MAX), &ray) {
-        let target = hit_rec.p + hit_rec.normal + Sphere::random_in_unit_sphere();
-        return 0.5 * color(Ray::from(hit_rec.p, target - hit_rec.p), world);
+        if depth < 50 {
+            if let Some((scattered, attenuation)) = hit_rec.mat.scatter(&ray, &hit_rec) {
+                return attenuation * color(scattered, world, depth + 1);
+            }
+        }
+
+        return Vec3::from(0.0, 0.0, 0.0);
     } else {
         let unit_dir = unit_vector(&ray.direction);
         let t = 0.5 * (unit_dir.y() + 1.0);
@@ -25,8 +31,26 @@ fn main() {
     let mut ppm = Ppm::from(width, height);
 
     let mut world = HittableList::new();
-    world.add(Box::new(Sphere::from(Vec3::from(0.0, 0.0, -1.0), 0.5)));
-    world.add(Box::new(Sphere::from(Vec3::from(0.0, -100.5, -1.0), 100.0)));
+    world.add(Box::new(Sphere::from(
+        Vec3::from(0.0, 0.0, -1.0),
+        0.5,
+        Rc::new(Lambertian::from(Vec3::from(0.8, 0.3, 0.3))),
+    )));
+    world.add(Box::new(Sphere::from(
+        Vec3::from(0.0, -100.5, -1.0),
+        100.0,
+        Rc::new(Lambertian::from(Vec3::from(0.8, 0.8, 0.0))),
+    )));
+    world.add(Box::new(Sphere::from(
+        Vec3::from(1.0, 0.0, -1.0),
+        0.5,
+        Rc::new(Metal::from(Vec3::from(0.8, 0.6, 0.2))),
+    )));
+    world.add(Box::new(Sphere::from(
+        Vec3::from(-1.0, 0.0, -1.0),
+        0.5,
+        Rc::new(Metal::from(Vec3::from(0.8, 0.8, 0.8))),
+    )));
 
     let camera = Camera::new();
     for y in (0..height).rev() {
@@ -37,7 +61,7 @@ fn main() {
                 let v = (y as f64 + random::<f64>()) / (height as f64);
 
                 let ray = camera.get_ray(u, v);
-                col += color(ray, &world);
+                col += color(ray, &world, 0);
             }
             col /= num_samples as f64;
             col = Vec3::from(f64::sqrt(col.x()), f64::sqrt(col.y()), f64::sqrt(col.z()));
@@ -46,6 +70,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter7-3.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter8-1.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }

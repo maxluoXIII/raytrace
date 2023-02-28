@@ -1,4 +1,5 @@
 pub mod hittable;
+pub mod material;
 pub mod types;
 
 use std::io::{BufWriter, Write};

@@ -118,6 +118,20 @@ impl ops::Sub<Vec3> for Vec3 {
     }
 }
 
+impl ops::Sub<Vec3> for &Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            e: [
+                self.e[0] - rhs.e[0],
+                self.e[1] - rhs.e[1],
+                self.e[2] - rhs.e[2],
+            ],
+        }
+    }
+}
+
 impl ops::SubAssign<Vec3> for Vec3 {
     fn sub_assign(&mut self, rhs: Vec3) {
         self.e[0] -= rhs.e[0];
@@ -145,11 +159,7 @@ impl ops::Mul<Vec3> for f64 {
 
     fn mul(self, rhs: Vec3) -> Self::Output {
         Vec3 {
-            e: [
-                self * rhs.e[0],
-                self * rhs.e[1],
-                self * rhs.e[2]
-            ]
+            e: [self * rhs.e[0], self * rhs.e[1], self * rhs.e[2]],
         }
     }
 }
@@ -168,6 +178,26 @@ impl ops::Mul<f64> for Vec3 {
     fn mul(self, rhs: f64) -> Self::Output {
         Vec3 {
             e: [self.e[0] * rhs, self.e[1] * rhs, self.e[2] * rhs],
+        }
+    }
+}
+
+impl ops::Mul<f64> for &Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vec3 {
+            e: [self.e[0] * rhs, self.e[1] * rhs, self.e[2] * rhs],
+        }
+    }
+}
+
+impl ops::Mul<&Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: &Vec3) -> Self::Output {
+        Vec3 {
+            e: [rhs.e[0] * self, rhs.e[1] * self, rhs.e[2] * self],
         }
     }
 }
@@ -248,21 +278,17 @@ pub struct Ray {
 }
 
 impl Ray {
-
-    /// Creates a Ray with origin at (0, 0, 0) 
+    /// Creates a Ray with origin at (0, 0, 0)
     /// that points at the center of the camera (0, 0, -1)
     pub fn new() -> Ray {
         Ray {
             origin: Vec3::from(0.0, 0.0, 0.0),
-            direction: Vec3::from(0.0, 0.0, -1.0)
+            direction: Vec3::from(0.0, 0.0, -1.0),
         }
     }
 
     pub fn from(origin: Vec3, direction: Vec3) -> Ray {
-        Ray {
-            origin,
-            direction
-        }
+        Ray { origin, direction }
     }
 
     pub fn pos(&self, t: f64) -> Vec3 {
