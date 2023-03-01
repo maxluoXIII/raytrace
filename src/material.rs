@@ -103,7 +103,7 @@ impl Material for Dielectric {
 
         if let Some(refracted) = refract(&r_in.direction, &outward_normal, ni_over_nt) {
             let reflect_prob = schlick(cosine, self.ref_idx);
-            
+
             if random::<f64>() > reflect_prob {
                 return Some((Ray::from(hit_rec.p, refracted), attenuation));
             }

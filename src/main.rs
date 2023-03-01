@@ -51,6 +51,11 @@ fn main() {
         0.5,
         Rc::new(Dielectric::from(1.5)),
     )));
+    world.add(Box::new(Sphere::from(
+        Vec3::from(-1.0, 0.0, -1.0),
+        -0.45,
+        Rc::new(Dielectric::from(1.5)),
+    )));
 
     let camera = Camera::new();
     for y in (0..height).rev() {
@@ -70,6 +75,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter9-1.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter9-2.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }
