@@ -14,6 +14,10 @@ impl Vec3 {
         Vec3 { e: [e0, e1, e2] }
     }
 
+    pub fn unit_vector(v: &Vec3) -> Vec3 {
+        v / v.length()
+    }
+
     pub fn x(&self) -> f64 {
         self.e[0]
     }
@@ -266,10 +270,6 @@ impl ops::Neg for Vec3 {
             e: [self.e[0] * -1.0, self.e[1] * -1.0, self.e[2] * -1.0],
         }
     }
-}
-
-pub fn unit_vector(v: &Vec3) -> Vec3 {
-    v / v.length()
 }
 
 pub struct Ray {

@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use rand::random;
 
-use crate::material::{Material, Lambertian};
+use crate::material::{Lambertian, Material};
 use crate::types::{Ray, Vec3};
 
 pub struct HitRecord {

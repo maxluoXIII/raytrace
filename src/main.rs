@@ -3,8 +3,8 @@ use std::{fs::File, rc::Rc};
 
 use raytrace::{
     hittable::{Hittable, HittableList, Sphere},
-    material::{Lambertian, Metal},
-    types::{unit_vector, Ray, Vec3},
+    material::{Dielectric, Lambertian, Metal},
+    types::{Ray, Vec3},
     Camera, Ppm,
 };
 
@@ -18,7 +18,7 @@ fn color(ray: Ray, world: &dyn Hittable, depth: usize) -> Vec3 {
 
         return Vec3::from(0.0, 0.0, 0.0);
     } else {
-        let unit_dir = unit_vector(&ray.direction);
+        let unit_dir = Vec3::unit_vector(&ray.direction);
         let t = 0.5 * (unit_dir.y() + 1.0);
         return (1.0 - t) * Vec3::from(1.0, 1.0, 1.0) + t * Vec3::from(0.5, 0.7, 1.0);
     }
@@ -44,12 +44,12 @@ fn main() {
     world.add(Box::new(Sphere::from(
         Vec3::from(1.0, 0.0, -1.0),
         0.5,
-        Rc::new(Metal::from(Vec3::from(0.8, 0.6, 0.2), 1.0)),
+        Rc::new(Metal::from(Vec3::from(0.8, 0.6, 0.2), 0.0)),
     )));
     world.add(Box::new(Sphere::from(
         Vec3::from(-1.0, 0.0, -1.0),
         0.5,
-        Rc::new(Metal::from(Vec3::from(0.8, 0.8, 0.8), 0.3)),
+        Rc::new(Dielectric::from(1.5)),
     )));
 
     let camera = Camera::new();
@@ -70,6 +70,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter8-2.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter9-1.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }
