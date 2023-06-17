@@ -1,18 +1,18 @@
 use std::ops;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Vec3 {
     e: [f64; 3],
 }
 
 impl Vec3 {
     pub fn new() -> Vec3 {
-        Vec3 { e: [0.0, 0.0, 0.0] }
+        Default::default()
     }
 
-    pub fn from(e0: f64, e1: f64, e2: f64) -> Vec3 {
-        Vec3 { e: [e0, e1, e2] }
-    }
+    // pub fn from(e0: f64, e1: f64, e2: f64) -> Vec3 {
+    //     Vec3 { e: [e0, e1, e2] }
+    // }
 
     pub fn unit_vector(v: &Vec3) -> Vec3 {
         v / v.length()
@@ -69,6 +69,20 @@ impl Vec3 {
                 self.e[0] * v2.e[1] - self.e[1] * v2.e[0],
             ],
         }
+    }
+}
+
+impl From<(f64, f64, f64)> for Vec3 {
+    fn from(tup: (f64, f64, f64)) -> Vec3 {
+        Vec3 {
+            e: [tup.0, tup.1, tup.2],
+        }
+    }
+}
+
+impl From<&[f64; 3]> for Vec3 {
+    fn from(slice: &[f64; 3]) -> Vec3 {
+        Vec3 { e: *slice }
     }
 }
 
@@ -282,8 +296,8 @@ impl Ray {
     /// that points at the center of the camera (0, 0, -1)
     pub fn new() -> Ray {
         Ray {
-            origin: Vec3::from(0.0, 0.0, 0.0),
-            direction: Vec3::from(0.0, 0.0, -1.0),
+            origin: Vec3::from((0.0, 0.0, 0.0)),
+            direction: Vec3::from((0.0, 0.0, -1.0)),
         }
     }
 

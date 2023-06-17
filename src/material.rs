@@ -90,7 +90,7 @@ impl Material for Dielectric {
         let mut outward_normal = hit_rec.normal.clone();
         let reflected = reflect(&r_in.direction, &hit_rec.normal);
         let mut ni_over_nt = 1.0 / self.ref_idx;
-        let attenuation = Vec3::from(1.0, 1.0, 1.0);
+        let attenuation = Vec3::from((1.0, 1.0, 1.0));
         let mut cosine = -Vec3::dot(&r_in.direction, &hit_rec.normal) / r_in.direction.length();
 
         // Handle total internal reflection

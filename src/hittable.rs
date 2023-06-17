@@ -23,15 +23,7 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new() -> Sphere {
-        Sphere {
-            center: Vec3::new(),
-            radius: 1.0,
-            material: Rc::new(Lambertian::from(Vec3::from(0.5, 0.5, 0.5))),
-        }
-    }
-
-    pub fn from(center: Vec3, radius: f64, material: Rc<dyn Material>) -> Sphere {
+    pub fn new(center: Vec3, radius: f64, material: Rc<dyn Material>) -> Sphere {
         Sphere {
             center,
             radius,
@@ -40,12 +32,22 @@ impl Sphere {
     }
 
     pub fn random_in_unit_sphere() -> Vec3 {
-        let mut sample = Vec3::from(random::<f64>(), random::<f64>(), random::<f64>());
+        let mut sample = Vec3::from((random::<f64>(), random::<f64>(), random::<f64>()));
         while sample.length() > 1.0 {
-            sample = Vec3::from(random::<f64>(), random::<f64>(), random::<f64>());
+            sample = Vec3::from((random::<f64>(), random::<f64>(), random::<f64>()));
         }
 
         sample
+    }
+}
+
+impl Default for Sphere {
+    fn default() -> Self {
+        Self {
+            center: Vec3::default(),
+            radius: 1.0,
+            material: Rc::new(Lambertian::from(Vec3::from((0.5, 0.5, 0.5)))),
+        }
     }
 }
 

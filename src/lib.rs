@@ -116,10 +116,10 @@ pub struct Camera {
 impl Camera {
     pub fn new() -> Camera {
         Camera {
-            origin: Vec3::from(0.0, 0.0, 0.0),
-            lower_left_corner: Vec3::from(-2.0, -1.0, -1.0),
-            horizontal: Vec3::from(4.0, 0.0, 0.0),
-            vertical: Vec3::from(0.0, 2.0, 0.0),
+            origin: Vec3::from((0.0, 0.0, 0.0)),
+            lower_left_corner: Vec3::from((-2.0, -1.0, -1.0)),
+            horizontal: Vec3::from((4.0, 0.0, 0.0)),
+            vertical: Vec3::from((0.0, 2.0, 0.0)),
         }
     }
 

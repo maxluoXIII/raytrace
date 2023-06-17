@@ -12,7 +12,7 @@ fn create_and_write() {
             let r = (x as f64) / (width as f64) * 255.99;
             let g = (y as f64) / (height as f64) * 255.99;
             let b = 0.2 * 255.99;
-            ppm.set_pixel(x, y, Vec3::from(r, g, b));
+            ppm.set_pixel(x, y, Vec3::from((r, g, b)));
         }
     }
 
@@ -26,5 +26,7 @@ fn create_and_write() {
         .read_to_end(&mut expected_output)
         .expect("Could not read expected file");
 
+    // If you are on windows, this test will likely fail due to carriage return
+    // line endings
     assert!(output == expected_output);
 }

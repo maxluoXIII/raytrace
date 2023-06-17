@@ -16,11 +16,11 @@ fn color(ray: Ray, world: &dyn Hittable, depth: usize) -> Vec3 {
             }
         }
 
-        return Vec3::from(0.0, 0.0, 0.0);
+        return Vec3::new();
     } else {
         let unit_dir = Vec3::unit_vector(&ray.direction);
         let t = 0.5 * (unit_dir.y() + 1.0);
-        return (1.0 - t) * Vec3::from(1.0, 1.0, 1.0) + t * Vec3::from(0.5, 0.7, 1.0);
+        return (1.0 - t) * Vec3::from((1.0, 1.0, 1.0)) + t * Vec3::from((0.5, 0.7, 1.0));
     }
 }
 
@@ -31,28 +31,28 @@ fn main() {
     let mut ppm = Ppm::from(width, height);
 
     let mut world = HittableList::new();
-    world.add(Box::new(Sphere::from(
-        Vec3::from(0.0, 0.0, -1.0),
+    world.add(Box::new(Sphere::new(
+        Vec3::from((0.0, 0.0, -1.0)),
         0.5,
-        Rc::new(Lambertian::from(Vec3::from(0.8, 0.3, 0.3))),
+        Rc::new(Lambertian::from(Vec3::from((0.8, 0.3, 0.3)))),
     )));
-    world.add(Box::new(Sphere::from(
-        Vec3::from(0.0, -100.5, -1.0),
+    world.add(Box::new(Sphere::new(
+        Vec3::from((0.0, -100.5, -1.0)),
         100.0,
-        Rc::new(Lambertian::from(Vec3::from(0.8, 0.8, 0.0))),
+        Rc::new(Lambertian::from(Vec3::from((0.8, 0.8, 0.0)))),
     )));
-    world.add(Box::new(Sphere::from(
-        Vec3::from(1.0, 0.0, -1.0),
+    world.add(Box::new(Sphere::new(
+        Vec3::from((1.0, 0.0, -1.0)),
         0.5,
-        Rc::new(Metal::from(Vec3::from(0.8, 0.6, 0.2), 0.0)),
+        Rc::new(Metal::from(Vec3::from((0.8, 0.6, 0.2)), 0.0)),
     )));
-    world.add(Box::new(Sphere::from(
-        Vec3::from(-1.0, 0.0, -1.0),
+    world.add(Box::new(Sphere::new(
+        Vec3::from((-1.0, 0.0, -1.0)),
         0.5,
         Rc::new(Dielectric::from(1.5)),
     )));
-    world.add(Box::new(Sphere::from(
-        Vec3::from(-1.0, 0.0, -1.0),
+    world.add(Box::new(Sphere::new(
+        Vec3::from((-1.0, 0.0, -1.0)),
         -0.45,
         Rc::new(Dielectric::from(1.5)),
     )));
@@ -69,7 +69,7 @@ fn main() {
                 col += color(ray, &world, 0);
             }
             col /= num_samples as f64;
-            col = Vec3::from(f64::sqrt(col.x()), f64::sqrt(col.y()), f64::sqrt(col.z()));
+            col = Vec3::from((f64::sqrt(col.x()), f64::sqrt(col.y()), f64::sqrt(col.z())));
 
             ppm.set_pixel(x, y, col * 255.99);
         }
