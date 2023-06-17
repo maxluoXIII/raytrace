@@ -1,5 +1,5 @@
 use rand::random;
-use std::{fs::File, rc::Rc};
+use std::{f64::consts::PI, fs::File, rc::Rc};
 
 use raytrace::{
     hittable::{Hittable, HittableList, Sphere},
@@ -30,34 +30,20 @@ fn main() {
     let num_samples = 100;
     let mut ppm = Ppm::from(width, height);
 
+    let r = f64::cos(PI / 4.);
     let mut world = HittableList::new();
     world.add(Box::new(Sphere::new(
-        Vec3::from((0.0, 0.0, -1.0)),
-        0.5,
-        Rc::new(Lambertian::from(Vec3::from((0.8, 0.3, 0.3)))),
+        Vec3::from((-r, 0., -1.)),
+        r,
+        Rc::new(Lambertian::from(Vec3::from((0., 0., 1.)))),
     )));
     world.add(Box::new(Sphere::new(
-        Vec3::from((0.0, -100.5, -1.0)),
-        100.0,
-        Rc::new(Lambertian::from(Vec3::from((0.8, 0.8, 0.0)))),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::from((1.0, 0.0, -1.0)),
-        0.5,
-        Rc::new(Metal::from(Vec3::from((0.8, 0.6, 0.2)), 0.0)),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::from((-1.0, 0.0, -1.0)),
-        0.5,
-        Rc::new(Dielectric::from(1.5)),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::from((-1.0, 0.0, -1.0)),
-        -0.45,
-        Rc::new(Dielectric::from(1.5)),
+        Vec3::from((r, 0., -1.)),
+        r,
+        Rc::new(Lambertian::from(Vec3::from((1., 0., 0.)))),
     )));
 
-    let camera = Camera::new();
+    let camera = Camera::new(90., width as f64 / height as f64);
     for y in (0..height).rev() {
         for x in 0..width {
             let mut col = Vec3::new();
@@ -75,6 +61,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter9-2.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter10-1.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }

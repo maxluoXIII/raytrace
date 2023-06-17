@@ -2,7 +2,7 @@ pub mod hittable;
 pub mod material;
 pub mod types;
 
-use std::io::{BufWriter, Write};
+use std::{io::{BufWriter, Write}, f64::consts::PI};
 
 use types::{Ray, Vec3};
 
@@ -114,12 +114,16 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new() -> Camera {
+    pub fn new(vert_fov: f64, aspect: f64) -> Camera {
+        let theta = vert_fov * PI / 180.;
+        let half_height = f64::tan(theta / 2.);
+        let half_width = aspect * half_height;
+
         Camera {
             origin: Vec3::from((0.0, 0.0, 0.0)),
-            lower_left_corner: Vec3::from((-2.0, -1.0, -1.0)),
-            horizontal: Vec3::from((4.0, 0.0, 0.0)),
-            vertical: Vec3::from((0.0, 2.0, 0.0)),
+            lower_left_corner: Vec3::from((-half_width, -half_height, -1.0)),
+            horizontal: Vec3::from((2. * half_width, 0.0, 0.0)),
+            vertical: Vec3::from((0.0, 2. * half_height, 0.0)),
         }
     }
 
