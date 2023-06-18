@@ -114,16 +114,22 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(vert_fov: f64, aspect: f64) -> Camera {
+
+    // vert_fov is top to bottom in degrees
+    pub fn new(look_from: Vec3, look_at: Vec3, view_up: Vec3, vert_fov: f64, aspect: f64) -> Camera {
         let theta = vert_fov * PI / 180.;
         let half_height = f64::tan(theta / 2.);
         let half_width = aspect * half_height;
 
+        let w = Vec3::unit_vector(&(look_from - look_at));
+        let u = Vec3::unit_vector(&view_up.cross(&w));
+        let v = &w.cross(&u);
+
         Camera {
-            origin: Vec3::from((0.0, 0.0, 0.0)),
-            lower_left_corner: Vec3::from((-half_width, -half_height, -1.0)),
-            horizontal: Vec3::from((2. * half_width, 0.0, 0.0)),
-            vertical: Vec3::from((0.0, 2. * half_height, 0.0)),
+            origin: look_from,
+            lower_left_corner: look_from - half_width*u - half_height*v - w,
+            horizontal: 2. * half_width * u,
+            vertical: 2. * half_height * v,
         }
     }
 
