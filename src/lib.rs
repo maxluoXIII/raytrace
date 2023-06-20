@@ -2,8 +2,12 @@ pub mod hittable;
 pub mod material;
 pub mod types;
 
-use std::{io::{BufWriter, Write}, f64::consts::PI};
+use std::{
+    f64::consts::PI,
+    io::{BufWriter, Write},
+};
 
+use rand::{random, Rng};
 use types::{Ray, Vec3};
 
 const PPM_HEADER: &str = "P3\n";
@@ -106,37 +110,67 @@ impl Ppm {
     }
 }
 
+fn random_in_unit_disk() -> Vec3 {
+    let mut rng = rand::thread_rng();
+    loop {
+        let p = 2. * Vec3::from((rng.gen(), rng.gen(), 0.)) - Vec3::from((1., 1., 0.));
+        if p.squared_len() < 1.0 {
+            return p;
+        }
+    }
+}
+
 pub struct Camera {
     origin: Vec3,
     lower_left_corner: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
+    lens_radius: f64,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
 }
 
 impl Camera {
-
     // vert_fov is top to bottom in degrees
-    pub fn new(look_from: Vec3, look_at: Vec3, view_up: Vec3, vert_fov: f64, aspect: f64) -> Camera {
+    pub fn new(
+        look_from: Vec3,
+        look_at: Vec3,
+        view_up: Vec3,
+        vert_fov: f64,
+        aspect: f64,
+        aperture: f64,
+        focus_dist: f64,
+    ) -> Camera {
         let theta = vert_fov * PI / 180.;
         let half_height = f64::tan(theta / 2.);
         let half_width = aspect * half_height;
 
         let w = Vec3::unit_vector(&(look_from - look_at));
         let u = Vec3::unit_vector(&view_up.cross(&w));
-        let v = &w.cross(&u);
+        let v = w.cross(&u);
 
         Camera {
             origin: look_from,
-            lower_left_corner: look_from - half_width*u - half_height*v - w,
-            horizontal: 2. * half_width * u,
-            vertical: 2. * half_height * v,
+            lower_left_corner: look_from
+                - half_width * focus_dist * u
+                - half_height * focus_dist * v
+                - focus_dist * w,
+            horizontal: 2. * half_width * focus_dist * u,
+            vertical: 2. * half_height * focus_dist * v,
+            lens_radius: aperture / 2.,
+            u,
+            v,
+            w,
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+    pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+        let ray_dir = self.lens_radius * random_in_unit_disk();
+        let offset = self.u * ray_dir.x() + self.v * ray_dir.y();
         Ray::from(
-            self.origin,
-            self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
+            self.origin + offset,
+            self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,
         )
     }
 }

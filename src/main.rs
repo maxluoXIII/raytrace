@@ -1,5 +1,5 @@
 use rand::random;
-use std::{f64::consts::PI, fs::File, rc::Rc};
+use std::{fs::File, rc::Rc};
 
 use raytrace::{
     hittable::{Hittable, HittableList, Sphere},
@@ -67,12 +67,18 @@ fn main() {
     //     Rc::new(Lambertian::from(Vec3::from((1., 0., 0.)))),
     // )));
 
+    let look_from = Vec3::from((3., 3., 2.));
+    let look_at = Vec3::from((0., 0., -1.));
+    let dist_to_focus = (look_from - look_at).length();
+    let aperture = 2.;
     let camera = Camera::new(
-        Vec3::from((-2., 2., 1.)),
-        Vec3::from((0., 0., -1.)),
+        look_from,
+        look_at,
         Vec3::from((0., 1., 0.)),
         20.,
         width as f64 / height as f64,
+        aperture,
+        dist_to_focus,
     );
     for y in (0..height).rev() {
         for x in 0..width {
@@ -91,6 +97,6 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter10-3.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/chapter11.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
 }
