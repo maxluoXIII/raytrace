@@ -6,13 +6,14 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn new() -> Vec3 {
-        Default::default()
+    pub fn new<T, U, V>(e0: T, e1: U, e2: V) -> Vec3
+    where
+        f64: From<T>,
+        f64: From<U>,
+        f64: From<V>,
+    {
+        Vec3 { e: [e0.into(), e1.into(), e2.into()] }
     }
-
-    // pub fn from(e0: f64, e1: f64, e2: f64) -> Vec3 {
-    //     Vec3 { e: [e0, e1, e2] }
-    // }
 
     pub fn unit_vector(v: &Vec3) -> Vec3 {
         v / v.length()

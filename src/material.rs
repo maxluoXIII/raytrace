@@ -14,7 +14,7 @@ pub struct Lambertian {
 }
 
 impl Lambertian {
-    pub fn from(albedo: Vec3) -> Lambertian {
+    pub fn new(albedo: Vec3) -> Lambertian {
         Lambertian { albedo }
     }
 }
@@ -35,7 +35,7 @@ pub struct Metal {
 }
 
 impl Metal {
-    pub fn from(albedo: Vec3, fuzziness: f64) -> Metal {
+    pub fn new(albedo: Vec3, fuzziness: f64) -> Metal {
         let fuzziness = f64::min(fuzziness, 1.0);
         Metal { albedo, fuzziness }
     }
@@ -62,7 +62,7 @@ pub struct Dielectric {
 }
 
 impl Dielectric {
-    pub fn from(ref_idx: f64) -> Dielectric {
+    pub fn new(ref_idx: f64) -> Dielectric {
         Dielectric { ref_idx }
     }
 }

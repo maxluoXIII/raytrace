@@ -7,7 +7,7 @@ use std::{
     io::{BufWriter, Write},
 };
 
-use rand::{random, Rng};
+use rand::{Rng};
 use types::{Ray, Vec3};
 
 const PPM_HEADER: &str = "P3\n";
@@ -32,7 +32,7 @@ impl Ppm {
         for y in 0..height {
             pixels.push(Vec::new());
             for _x in 0..width {
-                pixels[y].push(Vec3::new());
+                pixels[y].push(Vec3::default());
             }
         }
         Ppm {
@@ -47,7 +47,7 @@ impl Ppm {
         while self.pixels.len() < self.height {
             let mut new_row = Vec::new();
             for _ in 0..self.width {
-                new_row.push(Vec3::new());
+                new_row.push(Vec3::default());
             }
             self.pixels.push(new_row);
         }
@@ -61,7 +61,7 @@ impl Ppm {
                 row.truncate(self.width);
             } else {
                 while row.len() < self.width {
-                    row.push(Vec3::new());
+                    row.push(Vec3::default());
                 }
             }
         }
@@ -120,6 +120,7 @@ fn random_in_unit_disk() -> Vec3 {
     }
 }
 
+#[allow(dead_code)]
 pub struct Camera {
     origin: Vec3,
     lower_left_corner: Vec3,

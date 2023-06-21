@@ -1,5 +1,5 @@
 use rand::random;
-use std::{fs::File, rc::Rc};
+use std::{fs::File, rc::Rc, time::{SystemTime, Duration}};
 
 use raytrace::{
     hittable::{Hittable, HittableList, Sphere},
@@ -16,7 +16,7 @@ fn color(ray: Ray, world: &dyn Hittable, depth: usize) -> Vec3 {
             }
         }
 
-        return Vec3::new();
+        return Vec3::default();
     } else {
         let unit_dir = Vec3::unit_vector(&ray.direction);
         let t = 0.5 * (unit_dir.y() + 1.0);
@@ -25,64 +25,33 @@ fn color(ray: Ray, world: &dyn Hittable, depth: usize) -> Vec3 {
 }
 
 fn main() {
-    let width = 200;
-    let height = 100;
-    let num_samples = 100;
+    let aspect_ratio = 3. / 2.;
+    let width = 300;
+    let height = f64::round(width as f64 / aspect_ratio) as usize;
+    let num_samples = 200;
     let mut ppm = Ppm::from(width, height);
 
-    let mut world = HittableList::new();
-    world.add(Box::new(Sphere::new(
-        Vec3::from((0.0, 0.0, -1.0)),
-        0.5,
-        Rc::new(Lambertian::from(Vec3::from((0.8, 0.3, 0.3)))),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::from((0.0, -100.5, -1.0)),
-        100.0,
-        Rc::new(Lambertian::from(Vec3::from((0.8, 0.8, 0.0)))),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::from((1.0, 0.0, -1.0)),
-        0.5,
-        Rc::new(Metal::from(Vec3::from((0.8, 0.6, 0.2)), 0.0)),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::from((-1.0, 0.0, -1.0)),
-        0.5,
-        Rc::new(Dielectric::from(1.5)),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::from((-1.0, 0.0, -1.0)),
-        -0.45,
-        Rc::new(Dielectric::from(1.5)),
-    )));
-    // world.add(Box::new(Sphere::new(
-    //     Vec3::from((-r, 0., -1.)),
-    //     r,
-    //     Rc::new(Lambertian::from(Vec3::from((0., 0., 1.)))),
-    // )));
-    // world.add(Box::new(Sphere::new(
-    //     Vec3::from((r, 0., -1.)),
-    //     r,
-    //     Rc::new(Lambertian::from(Vec3::from((1., 0., 0.)))),
-    // )));
+    let world = random_scene();
 
-    let look_from = Vec3::from((3., 3., 2.));
-    let look_at = Vec3::from((0., 0., -1.));
-    let dist_to_focus = (look_from - look_at).length();
-    let aperture = 2.;
+    let look_from = Vec3::from((13., 2., 3.));
+    let look_at = Vec3::from((0., 0., 0.));
+    let dist_to_focus = 10.;
+    let aperture = 0.1;
     let camera = Camera::new(
         look_from,
         look_at,
         Vec3::from((0., 1., 0.)),
         20.,
-        width as f64 / height as f64,
+        aspect_ratio,
         aperture,
         dist_to_focus,
     );
+
+    let start = SystemTime::now();
+
     for y in (0..height).rev() {
         for x in 0..width {
-            let mut col = Vec3::new();
+            let mut col = Vec3::default();
             for _ in 0..num_samples {
                 let u = (x as f64 + random::<f64>()) / (width as f64);
                 let v = (y as f64 + random::<f64>()) / (height as f64);
@@ -97,6 +66,83 @@ fn main() {
         }
     }
 
-    let mut file = File::create("output/chapter11.ppm").expect("Could not create ppm file");
+    let mut file = File::create("output/random_scene.ppm").expect("Could not create ppm file");
     ppm.write(&mut file);
+
+    let end = SystemTime::now();
+    let delta = Duration::new(end.duration_since(start).unwrap().as_secs(), 0);
+    println!("Rendering took {}", humantime::format_duration(delta));
+}
+
+fn random_scene() -> HittableList {
+    let mut list = HittableList::new();
+    list.add(Box::new(Sphere::new(
+        Vec3::from((0., -1000., 0.)),
+        1000.,
+        Rc::new(Lambertian::new((0.5, 0.5, 0.5).into())),
+    )));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat: f64 = random();
+            let center = Vec3::from((
+                a as f64 + 0.9 * random::<f64>(),
+                0.2,
+                b as f64 + 0.9 * random::<f64>(),
+            ));
+            if (center - Vec3::from((4., 0.2, 0.))).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    // diffuse
+                    list.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Rc::new(Lambertian::new(Vec3::new(
+                            random::<f64>() * random::<f64>(),
+                            random::<f64>() * random::<f64>(),
+                            random::<f64>() * random::<f64>(),
+                        ))),
+                    )))
+                } else if choose_mat < 0.95 {
+                    // metal
+                    list.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Rc::new(Metal::new(
+                            Vec3::new(
+                                0.5 * (1. + random::<f64>()),
+                                0.5 * (1. + random::<f64>()),
+                                0.5 * (1. + random::<f64>()),
+                            ),
+                            0.5 * random::<f64>(),
+                        )),
+                    )));
+                } else {
+                    // glass
+                    list.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Rc::new(Dielectric::new(1.5)),
+                    )));
+                }
+            }
+        }
+    }
+
+    list.add(Box::new(Sphere::new(
+        Vec3::new(0, 1, 0),
+        1.,
+        Rc::new(Dielectric::new(1.5)),
+    )));
+    list.add(Box::new(Sphere::new(
+        Vec3::new(-4, 1, 0),
+        1.,
+        Rc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))),
+    )));
+    list.add(Box::new(Sphere::new(
+        Vec3::new(4, 1, 0),
+        1.,
+        Rc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.)),
+    )));
+
+    list
 }

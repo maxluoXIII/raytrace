@@ -46,7 +46,7 @@ impl Default for Sphere {
         Self {
             center: Vec3::default(),
             radius: 1.0,
-            material: Rc::new(Lambertian::from(Vec3::from((0.5, 0.5, 0.5)))),
+            material: Rc::new(Lambertian::new(Vec3::from((0.5, 0.5, 0.5)))),
         }
     }
 }
