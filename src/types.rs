@@ -1,4 +1,4 @@
-use std::ops;
+use std::{ops, iter};
 
 #[derive(Clone, Copy, Default)]
 pub struct Vec3 {
@@ -120,6 +120,22 @@ impl ops::AddAssign<Vec3> for Vec3 {
         self.e[0] += rhs.e[0];
         self.e[1] += rhs.e[1];
         self.e[2] += rhs.e[2];
+    }
+}
+
+impl iter::Sum<Vec3> for Vec3 {
+    fn sum<I: Iterator<Item = Vec3>>(iter: I) -> Self {
+        iter.fold(Vec3::default(), |sum, vec| {
+            sum + vec
+        })
+    }
+}
+
+impl<'a> iter::Sum<&'a Vec3> for Vec3 {
+    fn sum<I: Iterator<Item = &'a Vec3>>(iter: I) -> Self {
+        iter.fold(Vec3::default(), |sum, vec| {
+            sum + *vec
+        })
     }
 }
 

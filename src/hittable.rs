@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use rand::random;
 
@@ -9,7 +9,7 @@ pub struct HitRecord {
     pub t: f64,
     pub p: Vec3, // hit point
     pub normal: Vec3,
-    pub mat: Rc<dyn Material>,
+    pub mat: Arc<dyn Material>,
 }
 
 pub trait Hittable {
@@ -19,11 +19,11 @@ pub trait Hittable {
 pub struct Sphere {
     center: Vec3,
     radius: f64,
-    material: Rc<dyn Material>,
+    material: Arc<dyn Material + Sync + Send>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, material: Rc<dyn Material>) -> Sphere {
+    pub fn new(center: Vec3, radius: f64, material: Arc<dyn Material + Sync + Send>) -> Sphere {
         Sphere {
             center,
             radius,
@@ -46,7 +46,7 @@ impl Default for Sphere {
         Self {
             center: Vec3::default(),
             radius: 1.0,
-            material: Rc::new(Lambertian::new(Vec3::from((0.5, 0.5, 0.5)))),
+            material: Arc::new(Lambertian::new(Vec3::from((0.5, 0.5, 0.5)))),
         }
     }
 }
@@ -87,7 +87,7 @@ impl Hittable for Sphere {
 }
 
 pub struct HittableList {
-    list: Vec<Box<dyn Hittable>>,
+    list: Vec<Box<dyn Hittable + Sync>>,
 }
 
 impl HittableList {
@@ -95,7 +95,7 @@ impl HittableList {
         HittableList { list: Vec::new() }
     }
 
-    pub fn add(&mut self, obj: Box<dyn Hittable>) {
+    pub fn add(&mut self, obj: Box<dyn Hittable + Sync>) {
         self.list.push(obj);
     }
 }
